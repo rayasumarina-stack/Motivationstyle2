@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<title>Discipline Dashboard</title>
+
+<style>
+/* ANIMATIONS */
+
+.card{
+    animation:fadeUp 0.7s ease;
+    transition:0.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 0 25px rgba(255,255,255,0.08);
+}
+
+.progress-circle{
+    animation:pulse 3s infinite;
+    position:relative;
+    overflow:hidden;
+}
+
+.progress-circle::before{
+    content:"";
+    position:absolute;
+    width:220px;
+    height:220px;
+    background:conic-gradient(
+        white calc(var(--progress) * 1%),
+        rgba(255,255,255,0.08) 0
+    );
+    border-radius:50%;
+    z-index:-1;
+    animation:rotateGlow 4s linear infinite;
+}
+
+.task{
+    animation:taskAppear 0.4s ease;
+    transition:0.3s;
+}
+
+.task:hover{
+    transform:translateX(5px);
+}
+
+button{
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.03);
+    box-shadow:0 0 15px rgba(255,255,255,0.2);
+}
+
+.delete:hover{
+    background:#ff0000;
+}
+
+.check{
+    transition:0.3s;
+}
+
+.check:hover{
+    transform:scale(1.2);
+}
+
+@keyframes fadeUp{
+    from{
+        opacity:0;
+        transform:translateY(20px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@keyframes pulse{
+    0%{
+        box-shadow:0 0 10px rgba(255,255,255,0.05);
+    }
+    50%{
+        box-shadow:0 0 25px rgba(255,255,255,0.15);
+    }
+    100%{
+        box-shadow:0 0 10px rgba(255,255,255,0.05);
+    }
+}
+
+@keyframes rotateGlow{
+    from{
+        transform:rotate(0deg);
+    }
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+@keyframes taskAppear{
+    from{
+        opacity:0;
+        transform:translateX(-20px);
+    }
+    to{
+        opacity:1;
+        transform:translateX(0);
+    }
+}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#050505;
+    color:white;
+    min-height:100vh;
+    padding:30px;
+    overflow-x:hidden;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    width:600px;
+    height:600px;
+    background:radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+    top:-200px;
+    right:-100px;
+    z-index:-1;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    width:500px;
+    height:500px;
+    background:radial-gradient(circle, rgba(255,255,255,0.05), transparent 70%);
+    bottom:-200px;
+    left:-100px;
+    z-index:-1;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:bold;
+    letter-spacing:3px;
+}
+
+.profile{
+    color:#8a8a8a;
+    font-size:15px;
+}
+
+.dashboard{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
+}
+
+.card{
+    background:linear-gradient(145deg,#111,#0a0a0a);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:25px;
+    padding:25px;
+}
+
+.big-card{
+    min-height:320px;
+}
+
+.card-top{
+    display:flex;
+    justify-content:space-between;
+    color:#6d6d6d;
+    font-size:11px;
+    letter-spacing:2px;
+    margin-bottom:25px;
+}
+
+.main-title{
+    font-size:54px;
+    font-weight:bold;
+    margin-top:40px;
+}
+
+.subtitle{
+    color:#7d7d7d;
+    margin-top:10px;
+}
+
+.progress-circle{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    border:10px solid rgba(255,255,255,0.08);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:20px;
+}
+
+.percent{
+    font-size:42px;
+    font-weight:bold;
+}
+
+.task{
+    display:flex;
+    justify-content:space-between;
+    padding:10px 0;
+    align-items:center;
+}
+
+.check{
+    width:18px;
+    height:18px;
+    border:2px solid white;
+    border-radius:50%;
+    cursor:pointer;
+    display:inline-block;
+    margin-right:10px;
+}
+
+.completed{
+    background:white;
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:#0f0f0f;
+    border:1px solid #222;
+    color:white;
+    border-radius:10px;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    background:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.delete{
+    background:#ff3b3b;
+    color:white;
+    padding:5px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-left:10px;
+    width:auto;
+}
+
+.calendar{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:5px;
+    margin-top:10px;
+}
+
+.day{
+    width:100%;
+    aspect-ratio:1;
+    background:#222;
+    border-radius:4px;
+}
+
+.green{background:#00c853;}
+.yellow{background:#ffb300;}
+.red{background:#000;}
+
+</style>
+</head>
+
+<body>
+
+<div id="authBox" class="card" style="margin-bottom:20px;">
+    <h3>Аккаунт</h3>
+
+    <input id="email" placeholder="Email">
+    <input id="password" type="password" placeholder="Пароль">
+
+    <input id="photoURL" placeholder="URL фото (необязательно)">
+
+    <button onclick="register()">Регистрация</button>
+    <button onclick="login()">Войти</button>
+</div>
+<div class="header">
+    <button onclick="logout()" style="width:auto;padding:5px 10px;margin-left:10px;">
+    Сменить аккаунт
+    </button>
+    <img id="avatar" style="width:60px;height:60px;border-radius:50%;display:none;margin-top:10px;">
+    <div class="logo">ДИСЦИПЛИНА</div>
+    <div class="profile">@growth</div>
+</div>
+
+<div class="dashboard">
+
+<div class="card big-card">
+
+    <div class="card-top">
+        <span>ИЗМЕРЯЙ</span>
+        <span>АНАЛИЗИРУЙ</span>
+        <span>УЛУЧШАЙ</span>
+    </div>
+
+    <div class="main-title">ДИСЦИПЛИНА</div>
+    <div class="subtitle">Твой рост каждый день</div>
+
+    <div class="progress-circle">
+        <div class="percent" id="percent">0%</div>
+    </div>
+
+</div>
+
+<div>
+
+    <div class="card">
+        <h3>Цели</h3>
+        <input id="taskInput" placeholder="Новая задача">
+        <button onclick="addTask()">Добавить</button>
+        <div id="tasks"></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+        <h3>🔥 Streak</h3>
+        <h2 id="streak">0</h2>
+        <p id="level">Новичок</p>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+        <h3>📅 Активность</h3>
+        <div class="calendar" id="calendar"></div>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+let currentUserId = null;
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let streak = Number(localStorage.getItem("streak")) || 0;
+let xp = Number(localStorage.getItem("xp")) || 0;
+let history = JSON.parse(localStorage.getItem("history")) || [];
+
+function save(){
+
+    if(!currentUserId) return;
+
+    localStorage.setItem(
+        getKey("tasks"),
+        JSON.stringify(tasks)
+    );
+
+    localStorage.setItem(
+        getKey("streak"),
+        streak
+    );
+
+    localStorage.setItem(
+        getKey("xp"),
+        xp
+    );
+
+    localStorage.setItem(
+        getKey("history"),
+        JSON.stringify(history)
+    );
+}
+
+function hideAuth(){
+    document.getElementById("authBox").style.display = "none";
+}
+function getKey(key){
+    return key + "_" + currentUserId;
+}
+function showUser(user){
+
+    const img = document.getElementById("avatar");
+
+    if(user && user.photoURL){
+        img.src = user.photoURL;
+        img.style.display = "block";
+    }
+}
+
+function save(){
+    if(!currentUserId) return;
+
+    localStorage.setItem(getKey("tasks"), JSON.stringify(tasks));
+    localStorage.setItem(getKey("streak"), streak);
+    localStorage.setItem(getKey("xp"), xp);
+    localStorage.setItem(getKey("history"), JSON.stringify(history));
+}
+
+function addTask(){
+    let input = document.getElementById("taskInput");
+    if(!input.value) return;
+
+    tasks.push({text:input.value,done:false});
+    input.value="";
+    render();
+}
+
+function deleteTask(i){
+    tasks.splice(i,1);
+    render();
+    save();
+}
+function getKey(key){
+    return key + "_" + currentUserId;
+}
+function toggle(i){
+
+    tasks[i].done = !tasks[i].done;
+
+    if(tasks[i].done){
+        xp += 10;
+    }
+
+    let done = tasks.filter(e=>e.done).length;
+
+    let percent =
+    tasks.length
+    ? Math.round(done/tasks.length*100)
+    : 0;
+
+    updateStreak(percent);
+
+    render();
+}
+function resetUserData(){
+
+    tasks = [];
+    streak = 0;
+    xp = 0;
+    history = [];
+
+    document.getElementById("streak").innerText = streak;
+
+    save();
+    render();
+}
+function loadUserData(){
+
+    tasks =
+    JSON.parse(
+        localStorage.getItem(getKey("tasks"))
+    ) || [];
+
+    streak =
+    Number(
+        localStorage.getItem(getKey("streak"))
+    ) || 0;
+
+    xp =
+    Number(
+        localStorage.getItem(getKey("xp"))
+    ) || 0;
+
+    history =
+    JSON.parse(
+        localStorage.getItem(getKey("history"))
+    ) || [];
+
+    document.getElementById("streak").innerText = streak;
+
+    render();
+}
+
+function render(){
+
+    let t = document.getElementById("tasks");
+    t.innerHTML="";
+
+    tasks.forEach((e,i)=>{
+        t.innerHTML += `
+        <div class="task">
+            <div onclick="toggle(${i})">
+                <span class="check ${e.done?'completed':''}"></span>
+                ${e.text}
+            </div>
+            <button class="delete" onclick="deleteTask(${i})">✖</button>
+        </div>`;
+    });
+
+    let done = tasks.filter(e=>e.done).length;
+    let percent = tasks.length ? Math.round(done/tasks.length*100) : 0;
+
+    document.getElementById("percent").innerText = percent+"%";
+    document.querySelector(".progress-circle")
+    .style.setProperty("--progress", percent);
+    updateLevel();
+    updateCalendar();
+
+    save();
+}
+
+function updateStreak(percent){
+
+    let today = new Date().toDateString();
+
+    if(percent >= 80){
+        if(history[history.length-1] !== today){
+            streak++;
+            history.push({date:today,percent});
+        }
+    } else {
+        if(history[history.length-1] !== today){
+            streak = 0;
+        }
+    }
+
+    document.getElementById("streak").innerText = streak;
+}
+
+function updateLevel(){
+
+    let level = "Новичок";
+
+    if(xp > 50) level = "Стабильный";
+    if(xp > 150) level = "Сфокусированный";
+    if(xp > 300) level = "Элита";
+
+    document.getElementById("level").innerText = level;
+}
+
+function updateCalendar(){
+
+    let c = document.getElementById("calendar");
+    c.innerHTML = "";
+
+    let today = new Date();
+
+    for(let i=13;i>=0;i--){
+
+        let day = new Date();
+        day.setDate(today.getDate() - i);
+
+        let key = day.toDateString();
+
+        let status = history.find(h => h.date === key);
+
+        let div = document.createElement("div");
+        div.classList.add("day");
+
+        if(status){
+            if(status.percent >= 80) div.classList.add("green");
+            else if(status.percent >= 40) div.classList.add("yellow");
+            else div.classList.add("red");
+        } else {
+            div.classList.add("red");
+        }
+
+        c.appendChild(div);
+    }
+}
+
+render();
+
+</script>
+<script type="module">
+import { signOut } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+setDoc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Import the functions you need from the SDKs you need
+
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBWGJ84MDzptnR8w43aCqx-ivgv2qEajgc",
+  authDomain: "motivationstyle-72b5e.firebaseapp.com",
+  projectId: "motivationstyle-72b5e",
+  storageBucket: "motivationstyle-72b5e.firebasestorage.app",
+  messagingSenderId: "104366208094",
+  appId: "1:104366208094:web:9431a812247d1a238570cf",
+  measurementId: "G-LKK42ZPS3Q"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+
+const auth = getAuth(app);
+
+const db = getFirestore(app);
+window.register = async function(){
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const photoURL = document.getElementById("photoURL").value;
+
+    try{
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+
+        if(photoURL){
+            await updateProfile(result.user, {
+                photoURL: photoURL
+            });
+        }
+
+        resetUserData(); // 👈 ВОТ ТУТ (НОВЫЙ АККАУНТ = ЧИСТЫЙ СТАРТ)
+
+        showUser(result.user);
+        hideAuth();
+
+        alert("Аккаунт создан!");
+
+    }catch(err){
+        alert(err.message);
+    }
+}
+window.logout = async function(){
+
+    try{
+        await signOut(auth);
+
+        // очистка UI
+        document.getElementById("avatar").style.display = "none";
+        document.getElementById("authBox").style.display = "block";
+
+        alert("Вы вышли из аккаунта");
+
+    }catch(err){
+        alert(err.message);
+    }
+}
+
+window.login = async function(){
+
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    try{
+        const result = await signInWithEmailAndPassword(auth, email, password);
+
+        showUser(result.user);  // 👈 показать аватар
+        hideAuth();            // 👈 скрыть форму
+
+        alert("Вход выполнен!");
+
+    }catch(err){
+        alert(err.message);
+    }
+}
+
+import { onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+onAuthStateChanged(auth, (user)=>{
+
+    if(user){
+        currentUserId = user.uid;
+
+        loadUserData();   // 👈 загрузка данных
+        showUser(user);
+        hideAuth();
+
+    } else {
+        currentUserId = null;
+        document.getElementById("authBox").style.display = "block";
+    }
+});
+window.auth = auth;
+window.db = db;
+window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+window.doc = doc;
+window.setDoc = setDoc;
+window.getDoc = getDoc;
+
+</script>
+</body>
+</html>
